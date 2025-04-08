@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from sqlalchemy import func, and_
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import Session
@@ -7,21 +7,25 @@ from ..models.reservation import Reservation as ReservationModel
 
 
 def create_reservation(db: Session, reservation_data):
+    #Проверка свободно ли время брони
     new_reservation_end = reservation_data.reservation_time + timedelta(
         minutes=reservation_data.duration_minutes)
-
-    existing_reservation = db.query(ReservationModel).filter(
+    crossing_reservation = db.query(ReservationModel).filter(
         ReservationModel.table_id == reservation_data.table_id,
         and_(
             ReservationModel.reservation_time < new_reservation_end,
-            (ReservationModel.reservation_time +
-             (ReservationModel.duration_minutes * func.cast(
-                 '1 minute', INTERVAL
-             ))) > reservation_data.reservation_time,)
+            (
+                    ReservationModel.reservation_time +
+                    (ReservationModel.duration_minutes *
+                     func.cast('1 minute', INTERVAL))
+            ) > reservation_data.reservation_time,
+        )
     ).all()
-    if existing_reservation:
+    if crossing_reservation:
         raise ValueError("Table is booked at this time")
-
+    #Проверка актуальности даты брони
+    if reservation_data.reservation_time < datetime.now():
+        raise ValueError("Reservation time is in the past")
     db_reservation = ReservationModel(**reservation_data.dict())
     db.add(db_reservation)
     db.commit()
