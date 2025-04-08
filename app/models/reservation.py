@@ -4,11 +4,12 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+
 class Table(Base):
     __tablename__ = 'tables'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(String, index=True, unique=True)
     seats = Column(Integer)
     location = Column(String)
 
