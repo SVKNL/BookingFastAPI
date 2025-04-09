@@ -1,9 +1,13 @@
 from datetime import timedelta, datetime
+import pytz
 from sqlalchemy import func, and_
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import Session
 
 from ..models.reservation import Reservation as ReservationModel
+
+
+utc=pytz.UTC
 
 
 def create_reservation(db: Session, reservation_data):
@@ -24,7 +28,8 @@ def create_reservation(db: Session, reservation_data):
     if crossing_reservation:
         raise ValueError("Table is booked at this time")
     #Проверка актуальности даты брони
-    if reservation_data.reservation_time < datetime.now():
+    if (utc.localize(reservation_data.reservation_time) <
+            utc.localize(datetime.now())):
         raise ValueError("Reservation time is in the past")
     db_reservation = ReservationModel(**reservation_data.dict())
     db.add(db_reservation)
