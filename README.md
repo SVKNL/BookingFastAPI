@@ -12,7 +12,7 @@ FastAPI
 SQLAlchemy
 Alembic
 Docker
-PosstgreSQL
+PostgreSQL
 ```
 
 Запуск проекта:
