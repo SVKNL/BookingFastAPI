@@ -33,7 +33,7 @@ sudo docker compose -f docker-compose.yml exec web alembic upgrade head
 Провести тесты:
 
 ```
-sudo docker compose -f docker-compose.yml exec web pytest tests
+sudo docker compose -f docker-compose.yml exec web pytest app/tests
 ```
 
 Проект доступен по адресу:
